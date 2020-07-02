@@ -1,0 +1,24 @@
+{
+    "prefix": "radio-",
+    "token": "BOT_TOKEN",
+    "users": ["DISCORD", "USER", "ID"],
+    "stations": [
+        {
+            "host": "Sigma Simon",
+            "name": "sigma-simon",
+            "id": 1
+        }
+    ],
+    "pattern": [
+        {
+            "type": "song",
+            "path": "audio/song",
+            "frequency": 12
+        },
+        {
+            "type": "episode",
+            "path": "audio/episode",
+            "frequency": 1
+        }
+    ]
+}
