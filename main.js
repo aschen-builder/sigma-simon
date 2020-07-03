@@ -88,14 +88,12 @@ async function play(message, guildQueue) {
         queue.set(message.guild.id, queueConstruct);
 
         queueConstruct.songs = fetchSongs(audiodir.path);
-        console.dir(queueConstruct.songs);
 
         try {
             var connection = await voiceChannel.join();
             queueConstruct.connection = connection;
 
-            //queueConstruct.connection.play(`audio/${queueConstruct.songs[0]}`);
-            execute(message.guild, queueConstruct.volume);
+            execute(message, message.guild, queueConstruct.volume);
         } catch (err) {
             console.log(err);
             queue.delete(message.guild.id);
@@ -104,14 +102,12 @@ async function play(message, guildQueue) {
         }
     } else {
         guildQueue.songs = fetchSongs(audiodir.path);
-        console.dir(guildQueue.songs);
 
         try {
             var connection = await voiceChannel.join();
             guildQueue.connection = connection;
 
-            //queueConstruct.connection.play(`audio/${queueConstruct.songs[0]}`);
-            execute(message.guild, guildQueue.volume);
+            execute(message, message.guild, guildQueue.volume);
         } catch (err) {
             console.log(err);
             queue.delete(message.guild.id);
@@ -133,14 +129,22 @@ function skip(message, guildQueue) {
     guildQueue.connection.dispatcher.end();
 }
 
-function execute(guild, vol) {
+function execute(msg, guild, vol) {
     const curQueue = queue.get(guild.id);
+    if (curQueue.songs == undefined || curQueue.songs.length == 0) {
+        console.log("Queue is empty...");
+    } else { console.log(curQueue.songs); }
 
     const dispatcher = curQueue.connection;
     dispatcher
         .play(`audio/${curQueue.songs.shift()}`)
         .on('finish', () => {
-            execute(guild);
+            if (curQueue.songs == undefined || curQueue.songs.length == 0) {
+                console.log('Queue is empty, regenerating with new shuffle...');
+                play(msg);
+            } else {
+                execute(msg, guild, vol);
+            }
         })
         .on('error', () => console.error(error));
 }
@@ -199,7 +203,7 @@ function kill(vc) {
     vc.leave();
     setTimeout((function() {
         return process.exit(22);
-    }), 5000);
+    }), 2000);
 }
 
 function shuffleArr(arr) {
