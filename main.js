@@ -52,9 +52,12 @@ client.on('message', async message => {
         togglePause(message, guildQueue);
         return message.channel.send('Sigma Simon Radio is now resumed...');
 
+    } else if (message.content.startsWith(`${prefix}poopchute`)) {
+        message.channel.send('SHOW ME YOUR BUTTHOLE!', {files: ["C:/projects/sigma-simon-dev/img/okay maybe you don't want to go in here/seriously you should probably turn around/okay I warned you/poopchute.png"]});
+
     } else if (message.content.startsWith(`${prefix}kill`)) {
         message.channel.send('This feels like more than just stasis...');
-        kill();
+        kill(message.member.voice.channel);
 
     } else {
         message.channel.send("Well... that probably didn't work out the way you wanted to lol");
@@ -135,7 +138,7 @@ function execute(guild, vol) {
 
     const dispatcher = curQueue.connection;
     dispatcher
-        .play(`audio/${curQueue.songs.shift()}`, {volume: vol/15})
+        .play(`audio/${curQueue.songs.shift()}`)
         .on('finish', () => {
             execute(guild);
         })
@@ -148,7 +151,7 @@ function fetchSongs(path) {
 
     pattern.forEach(function(e) {
         let dump = fs.readdirSync(e.path);
-        trackMap.set(e.type, dump);
+        trackMap.set(e.type, shuffleArr(dump));
         trackCount += dump.length;
     });
 
@@ -175,12 +178,12 @@ function fetchSongs(path) {
     }
     
     //console.log(tracks);
+    //return shuffleArr(tracks);
     return tracks;
 }
 
 function stop(voicechannel) {
     voicechannel.leave();
-    console.log('^C');
     return;
 }
 
@@ -192,10 +195,22 @@ function togglePause(message, guildQueue) {
     }
 }
 
-function kill() {
+function kill(vc) {
+    vc.leave();
     setTimeout((function() {
         return process.exit(22);
     }), 5000);
+}
+
+function shuffleArr(arr) {
+    for(let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * i);
+        const temp = arr[i];
+        arr[i] = arr[j];
+        arr[j] = temp;
+    }
+
+    return arr;
 }
 
 client.login(token);
